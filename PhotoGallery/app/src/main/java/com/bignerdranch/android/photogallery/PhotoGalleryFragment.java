@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,8 +114,8 @@ public class PhotoGalleryFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(PhotoHolder holder, int position) {
-            GalleryItem galleryItem = mGalleryItems.get(position);
+        public void onBindViewHolder(final PhotoHolder holder, int position) {
+            final GalleryItem galleryItem = mGalleryItems.get(position);
             Drawable placeholder;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 placeholder = getResources().getDrawable(R.drawable.download, getActivity().getTheme());
@@ -121,13 +123,20 @@ public class PhotoGalleryFragment extends Fragment {
                 placeholder = getResources().getDrawable(R.drawable.download);
             }
             holder.bindDrawable(placeholder);
-            mThumbnailDownloader.queueThumbnail(holder, galleryItem.getUrl());
+            Picasso.with(getContext()).load(galleryItem.getUrl()).resize(120, 60).into(holder.mItemImageView);
+            holder.mItemImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mThumbnailDownloader.queueThumbnail(holder, galleryItem.getUrl());
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
             return mGalleryItems.size();
         }
+
     }
 
     private class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
